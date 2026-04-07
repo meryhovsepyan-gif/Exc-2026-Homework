@@ -1,0 +1,28 @@
+#include <iostream>
+#include <unordered_map>
+using namespace std;
+int main()
+{
+	int n;
+	cin>> n;
+	int num[n];
+	unordered_map<int, bool> seen;
+	bool hasDuplicate = false;
+
+	for (int i = 0; i < n; i++) {
+		cin >> num[i];
+
+		if (seen[num[i]]) {
+			hasDuplicate = true;
+		}
+		seen[num[i]] = true;
+	}
+
+	if (hasDuplicate) {
+		cout << "True" << endl;
+	} else {
+		cout << "False" << endl;
+	}
+
+	return 0;
+}
