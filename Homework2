@@ -1,0 +1,50 @@
+#include <iostream>
+#include <algorithm>
+using namespace std;
+
+int main() {
+    int n;
+    cin >> n;
+
+    int start[100];
+    int end[100];
+    bool skip[100];
+
+    for (int i = 0; i < n; i++) {
+        cin >> start[i] >> end[i];
+        skip[i] = false; 
+    }
+    cin >> start[n] >> end[n];
+    skip[n] = false;
+    n++;
+    
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = i + 1; j < n; j++) {
+            if (start[i] > start[j]) {
+                swap(start[i], start[j]);
+                swap(end[i], end[j]);
+            }
+        }
+    }
+    
+    for (int i = 0; i < n; i++) {
+        if (skip[i]) continue; 
+        for (int j = i + 1; j < n; j++) {
+            if (skip[j]) continue;
+            if (start[i] <= end[j] && start[j] <= end[i]) {
+                if (start[j] < start[i]) start[i] = start[j];
+                if (end[j] > end[i]) end[i] = end[j];
+
+                skip[j] = true;
+            }
+        }
+    }
+
+    for (int i = 0; i < n; i++) {
+        if (!skip[i]) {
+            cout << "[" << start[i] << ", " << end[i] << "] ";
+        }
+    }
+
+    return 0;
+}
