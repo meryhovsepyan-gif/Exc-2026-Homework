@@ -1,0 +1,28 @@
+#include <iostream>
+using namespace std;
+long long fibonacci(long long n){
+    if(n <= 1){
+        return n;
+    }
+    return fibonacci(n - 1) + fibonacci(n - 2);
+    }
+int main()
+{
+    long long target;
+    cin >> target;
+    
+    long long index = 0;
+    while(true){
+        long long value = fibonacci(index);
+        if(value == target){
+            cout << index;
+            break;
+        }
+       if(value > target){
+           cout << -1;
+           break;
+       }
+       index++;
+    }
+    return 0;
+}
