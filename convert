@@ -1,0 +1,48 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+long toDec(string s, int base) {
+    if(s.length() > 10){
+        return -1;
+    }
+    long result = 0;
+
+    for (int i = 0; i < s.size(); i++) {
+        int digit = s[i] - '0';
+        result = result * base + digit;
+    }
+
+    return result;
+}
+
+string convert(long n, int base) {
+    if (n == 0) return "0";
+
+    string result = "";
+
+    while (n > 0) {
+        int digit = n % base;
+        char c = digit + '0';
+        result = c + result; 
+        n /= base;
+    }
+
+    return result;
+}
+
+int main() {
+    string number;
+    int b1, b2;
+
+    cin >> number >> b1 >> b2;
+
+    long decimal = toDec(number, b1);
+    string result = convert(decimal, b2);
+
+    cout << result << endl;
+
+    return 0;
+}
+
+/*Սկզբում այդ թիվը դարձնում ենք 10-ականի toDec - ում, ապա վերածում պահանջվածի convert-ում։*/
