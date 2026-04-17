@@ -1,0 +1,131 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <vector>
+
+using namespace std;
+
+string to_low(string s) {
+    for (int i = 0; i < s.length(); i++) {
+        if (s[i] >= 'A' && s[i] <= 'Z') {
+            s[i] = s[i] + 32;
+        }
+    }
+    return s;
+}
+
+string remove_spaces(string s) {
+    string result = "";
+    for (int i = 0; i < s.length(); i++) {
+        if (s[i] != ' ' && s[i] != '\r' && s[i] != '\n') {
+            result += s[i];
+        }
+    }
+    return result;
+}
+
+int main() {
+    ifstream file("worldcities.csv");
+    vector<string> cities;
+    string line;
+
+    getline(file, line); 
+
+    while (getline(file, line)) {
+        string city = "";
+        int comma_count = 0;
+        for (int i = 0; i < line.length(); i++) {
+            if (line[i] == ',') {
+                comma_count++;
+                continue;
+            }
+            if (comma_count == 1) {
+                if (line[i] != '\"') city += line[i];
+            }
+            if (comma_count > 1) break;
+        }
+        if (city != "") cities.push_back(city);
+    }
+    file.close();
+
+    vector<string> used;
+    char next_letter = ' ';
+    string input;
+
+    while (true) {
+        cout << "Enter city: ";
+        getline(cin, input);
+
+        if (input == "exit") break;
+        if (input == "") continue;
+
+        string clean_input = remove_spaces(to_low(input));
+        bool exists = false;
+        string current_city = "";
+        
+        for (int i = 0; i < cities.size(); i++) {
+            string clean_db_city = remove_spaces(to_low(cities[i]));
+            if (clean_db_city == clean_input) {
+                exists = true;
+                current_city = cities[i];
+                break;
+            }
+        }
+
+        if (!exists) {
+            cout << "No such city in file!" << endl;
+            continue;
+        }
+
+        bool already_used = false;
+        for (int i = 0; i < used.size(); i++) {
+            if (used[i] == current_city) {
+                already_used = true;
+                break;
+            }
+        }
+
+        if (already_used) {
+            cout << "Already used!" << endl;
+            continue;
+        }
+
+        string current_low = remove_spaces(to_low(current_city));
+        if (next_letter != ' ' && current_low[0] != next_letter) {
+            cout << "Must start with " << next_letter << endl;
+            continue;
+        }
+
+        used.push_back(current_city);
+        char last = current_low[current_low.length() - 1];
+
+        string bot_city = "";
+        for (int i = 0; i < cities.size(); i++) {
+            string c = cities[i];
+            bool is_used = false;
+            for (int j = 0; j < used.size(); j++) {
+                if (used[j] == c) { is_used = true; break; }
+            }
+
+            string clean_c = remove_spaces(to_low(c));
+            if (!is_used && clean_c[0] == last) {
+                bot_city = c;
+                break;
+            }
+        }
+
+        if (bot_city == "") {
+            cout << "You win!" << endl;
+            break;
+        }
+
+        used.push_back(bot_city);
+        cout << "AI: " << bot_city << endl;
+        
+        string low_bot = remove_spaces(to_low(bot_city));
+        next_letter = low_bot[low_bot.length() - 1];
+        cout << "Next letter: " << next_letter << endl;
+    }
+
+    return 0;
+}
