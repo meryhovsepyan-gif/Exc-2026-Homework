@@ -1,0 +1,139 @@
+[4/17/2026 11:27 PM] £ight: #include <iostream>
+#include <fstream>
+#include <string>
+#include <vector>
+
+using namespace std;
+
+struct City {
+    string id, name, lat, lng, country, iso2, iso3, population;
+    long long pop_num;
+    double lat_num, lng_num;
+};
+
+string to_low(string s) {
+    for (int i = 0; i < s.length(); i++) {
+        s[i] = tolower(s[i]);
+    }
+    return s;
+}
+
+string remove_spaces(string s) {
+    string res = "";
+    for (int i = 0; i < s.length(); i++) {
+        if (s[i] != ' ' && s[i] != '\r' && s[i] != '\n') res += s[i];
+    }
+    return res;
+}
+
+int main() {
+    ifstream file("worldcities.csv");
+    vector<City> data;
+    string line;
+    getline(file, line);
+
+    while (getline(file, line)) {
+        City c;
+        string fields[8];
+        int col = 0;
+        string current = "";
+        bool in_quotes = false;
+
+        for (int i = 0; i < line.length(); i++) {
+            if (line[i] == '\"') in_quotes = !in_quotes;
+            else if (line[i] == ',' && !in_quotes) {
+                if (col < 8) fields[col] = current;
+                current = "";
+                col++;
+            } else {
+                current += line[i];
+            }
+        }
+        fields[7] = current;
+
+        c.id = fields[0]; c.name = fields[1]; c.lat = fields[2];
+        c.lng = fields[3]; c.country = fields[4]; c.iso2 = fields[5];
+        c.iso3 = fields[6]; c.population = fields[7];
+
+        if (c.population != "") c.pop_num = stoll(c.population); else c.pop_num = 0;
+        if (c.lat != "") c.lat_num = stod(c.lat); else c.lat_num = 0;
+        if (c.lng != "") c.lng_num = stod(c.lng); else c.lng_num = 0;
+
+        data.push_back(c);
+    }
+    file.close();
+
+    while (true) {
+        cout << "Enter query: ";
+        string query;
+        getline(cin, query);
+        if (query == "exit") break;
+
+        string op = "";
+        if (query.find(">=") != -1) op = ">=";
+        else if (query.find("<=") != -1) op = "<=";
+        else if (query.find("==") != -1) op = "==";
+        else if (query.find(">") != -1) op = ">";
+        else if (query.find("<") != -1) op = "<";
+
+        if (op == "") continue;
+
+        int pos = query.find(op);
+        string attr = remove_spaces(to_low(query.substr(0, pos)));
+        string val_str = remove_spaces(query.substr(pos + op.length()));
+
+        long long target_pop = -1;
+        if (attr == "city") {
+            for (int i = 0; i < data.size(); i++) {
+                if (to_low(data[i].name) == to_low(val_str)) {
+                    target_pop = data[i].pop_num;
+                    break;
+                }
+            }
+        }
+
+        for (int i = 0; i < data.size(); i++) {
+            bool match = false;
+            if (attr == "population") {
+                long long v = stoll(val_str);
+                if (op == ">" && data[i].pop_num > v) match = true;
+                if (op == "<" && data[i].pop_num < v) match = true;
+                if (op == ">=" && data[i].pop_num >= v) match = true;
+                if (op == "<=" && data[i].pop_num <= v) match = true;
+                if (op == "==" && data[i].pop_num == v) match = true;
+            } 
+            else if (attr == "country") {
+                if (op == "==" && to_low(data[i].country) == to_low(val_str)) match = true;
+            }
+            else if (attr == "lat") {
+                double v = stod(val_str);
+                if (op == ">" && data[i].lat_num > v) match = true;
+                if (op == "<" && data[i].lat_num < v) match = true;
+                if (op == "==" && data[i].lat_num == v) match = true;
+                if (op == ">=" && data[i].lat_num >= v) match = true;
+                if (op == "<=" && data[i].lat_num <= v) match = true;
+            }
+            else if (attr == "lng") {
+                double v = stod(val_str);
+                if (op == ">" && data[i].lng_num > v) match = true;
+[4/17/2026 11:27 PM] £ight: if (op == "<" && data[i].lng_num < v) match = true;
+                if (op == "==" && data[i].lng_num == v) match = true;
+                if (op == ">=" && data[i].lng_num >= v) match = true;
+                if (op == "<=" && data[i].lng_num <= v) match = true;
+            }
+            else if (attr == "city" && target_pop != -1) {
+                if (op == ">" && data[i].pop_num > target_pop) match = true;
+                if (op == "<" && data[i].pop_num < target_pop) match = true;
+                if (op == "==" && data[i].pop_num == target_pop) match = true;
+                if (op == ">=" && data[i].pop_num >= target_pop) match = true;
+                if (op == "<=" && data[i].pop_num <= target_pop) match = true;
+            }
+
+            if (match) {
+                cout << data[i].id << "," << data[i].name << "," << data[i].country << "," 
+                     << data[i].lat << "," << data[i].lng << "," << data[i].population << endl;
+            }
+        }
+    }
+    return 0;
+}
